@@ -10,6 +10,7 @@ import kagglehub  # Make sure to install this package
 try:
     path = kagglehub.dataset_download("shrutimechlearn/customer-data")
     csv_file = os.path.join(path, "Mall_Customers.csv")
+    print(f"Dataset downloaded to: {csv_file}")
     customer_df = pd.read_csv(csv_file)
     print(f"Successfully loaded dataset with {customer_df.shape[0]} customers")
 except Exception as e:
@@ -1103,94 +1104,94 @@ try:
         plt.show()
     
     # Export a summary report if matplotlib has savefig
-    try:
-        print("Generating summary report...")
-        # Create a summary figure
-        summary_fig = plt.figure(figsize=(11, 8.5))  # US Letter size
+    # try:
+    #     print("Generating summary report...")
+    #     # Create a summary figure
+    #     summary_fig = plt.figure(figsize=(11, 8.5))  # US Letter size
         
-        # Create a text summary
-        ax = summary_fig.add_subplot(1, 1, 1)
-        ax.axis('off')
+    #     # Create a text summary
+    #     ax = summary_fig.add_subplot(1, 1, 1)
+    #     ax.axis('off')
         
-        # Calculate basic statistics for the report
-        segment_count = {}
-        segment_avg_age = {}
-        segment_avg_income = {}
+    #     # Calculate basic statistics for the report
+    #     segment_count = {}
+    #     segment_avg_age = {}
+    #     segment_avg_income = {}
         
-        # Assign each customer to nearest neuron
-        customer_segments = []
-        for x in data:
-            distances = np.linalg.norm(final_weights - x, axis=1)
-            bmu = np.argmin(distances)
-            customer_segments.append(bmu)
+    #     # Assign each customer to nearest neuron
+    #     customer_segments = []
+    #     for x in data:
+    #         distances = np.linalg.norm(final_weights - x, axis=1)
+    #         bmu = np.argmin(distances)
+    #         customer_segments.append(bmu)
         
-        for segment in range(num_neurons):
-            segment_mask = np.array(customer_segments) == segment
-            segment_data = data[segment_mask]
+    #     for segment in range(num_neurons):
+    #         segment_mask = np.array(customer_segments) == segment
+    #         segment_data = data[segment_mask]
             
-            if len(segment_data) > 0:
-                segment_count[segment] = len(segment_data)
-                segment_avg_age[segment] = np.mean(segment_data[:, 0])
-                segment_avg_income[segment] = np.mean(segment_data[:, 1])
-            else:
-                segment_count[segment] = 0
-                segment_avg_age[segment] = 0
-                segment_avg_income[segment] = 0
+    #         if len(segment_data) > 0:
+    #             segment_count[segment] = len(segment_data)
+    #             segment_avg_age[segment] = np.mean(segment_data[:, 0])
+    #             segment_avg_income[segment] = np.mean(segment_data[:, 1])
+    #         else:
+    #             segment_count[segment] = 0
+    #             segment_avg_age[segment] = 0
+    #             segment_avg_income[segment] = 0
         
-        # Create the report text
-        report_text = "MALL CUSTOMER SEGMENTATION ANALYSIS\n"
-        report_text += "==================================\n\n"
-        report_text += f"Dataset: {customer_df.shape[0]} customers\n"
-        report_text += f"Features: Age and Annual Income\n"
-        report_text += f"SOM Grid Size: {grid_shape[0]}x{grid_shape[1]} ({num_neurons} segments)\n\n"
-        report_text += "SEGMENT SUMMARY\n"
-        report_text += "--------------\n\n"
+    #     # Create the report text
+    #     report_text = "MALL CUSTOMER SEGMENTATION ANALYSIS\n"
+    #     report_text += "==================================\n\n"
+    #     report_text += f"Dataset: {customer_df.shape[0]} customers\n"
+    #     report_text += f"Features: Age and Annual Income\n"
+    #     report_text += f"SOM Grid Size: {grid_shape[0]}x{grid_shape[1]} ({num_neurons} segments)\n\n"
+    #     report_text += "SEGMENT SUMMARY\n"
+    #     report_text += "--------------\n\n"
         
-        # Add segment statistics
-        for segment in range(num_neurons):
-            if segment_count[segment] > 0:
-                age_profile = "Young" if segment_avg_age[segment] < 30 else "Middle-aged" if segment_avg_age[segment] < 50 else "Senior"
-                income_profile = "Low" if segment_avg_income[segment] < 40 else "Medium" if segment_avg_income[segment] < 70 else "High"
+    #     # Add segment statistics
+    #     for segment in range(num_neurons):
+    #         if segment_count[segment] > 0:
+    #             age_profile = "Young" if segment_avg_age[segment] < 30 else "Middle-aged" if segment_avg_age[segment] < 50 else "Senior"
+    #             income_profile = "Low" if segment_avg_income[segment] < 40 else "Medium" if segment_avg_income[segment] < 70 else "High"
                 
-                report_text += f"Segment {segment+1}:\n"
-                report_text += f"  Customers: {segment_count[segment]}\n"
-                report_text += f"  Average Age: {segment_avg_age[segment]:.1f}\n"
-                report_text += f"  Average Income: ${segment_avg_income[segment]:.1f}k\n"
-                report_text += f"  Profile: {age_profile}, {income_profile} income\n\n"
+    #             report_text += f"Segment {segment+1}:\n"
+    #             report_text += f"  Customers: {segment_count[segment]}\n"
+    #             report_text += f"  Average Age: {segment_avg_age[segment]:.1f}\n"
+    #             report_text += f"  Average Income: ${segment_avg_income[segment]:.1f}k\n"
+    #             report_text += f"  Profile: {age_profile}, {income_profile} income\n\n"
         
-        # Add methodology explanation
-        report_text += "\nMETHODOLOGY\n"
-        report_text += "-----------\n\n"
-        report_text += "Self-Organizing Maps (SOM) were used to identify natural segments in customer data.\n"
-        report_text += "The algorithm works as follows:\n"
-        report_text += "1. Initialize a grid of neurons with random weights\n"
-        report_text += "2. For each customer data point:\n"
-        report_text += "   a. Find the Best Matching Unit (BMU) - the neuron closest to the data point\n"
-        report_text += "   b. Update the BMU and its neighbors to move closer to the data point\n"
-        report_text += "3. Repeat for multiple epochs with decreasing learning rates\n"
-        report_text += "4. Assign customers to their closest neurons to form segments\n\n"
+    #     # Add methodology explanation
+    #     report_text += "\nMETHODOLOGY\n"
+    #     report_text += "-----------\n\n"
+    #     report_text += "Self-Organizing Maps (SOM) were used to identify natural segments in customer data.\n"
+    #     report_text += "The algorithm works as follows:\n"
+    #     report_text += "1. Initialize a grid of neurons with random weights\n"
+    #     report_text += "2. For each customer data point:\n"
+    #     report_text += "   a. Find the Best Matching Unit (BMU) - the neuron closest to the data point\n"
+    #     report_text += "   b. Update the BMU and its neighbors to move closer to the data point\n"
+    #     report_text += "3. Repeat for multiple epochs with decreasing learning rates\n"
+    #     report_text += "4. Assign customers to their closest neurons to form segments\n\n"
         
-        # Add conclusion
-        report_text += "CONCLUSION\n"
-        report_text += "----------\n\n"
-        report_text += "The SOM algorithm successfully identified distinct customer segments based on\n"
-        report_text += "age and income profiles. These segments can be used for targeted marketing\n"
-        report_text += "strategies. The U-Matrix visualization helps identify segment boundaries and\n"
-        report_text += "similarities between adjacent segments.\n\n"
+    #     # Add conclusion
+    #     report_text += "CONCLUSION\n"
+    #     report_text += "----------\n\n"
+    #     report_text += "The SOM algorithm successfully identified distinct customer segments based on\n"
+    #     report_text += "age and income profiles. These segments can be used for targeted marketing\n"
+    #     report_text += "strategies. The U-Matrix visualization helps identify segment boundaries and\n"
+    #     report_text += "similarities between adjacent segments.\n\n"
         
-        # Add date
-        from datetime import datetime
-        report_text += f"Report generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+    #     # Add date
+    #     from datetime import datetime
+    #     report_text += f"Report generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
         
-        ax.text(0.05, 0.95, report_text, va='top', fontsize=10, family='monospace')
+    #     ax.text(0.05, 0.95, report_text, va='top', fontsize=10, family='monospace')
         
-        # Save the report
-        summary_fig.tight_layout()
-        summary_fig.savefig('mall_customer_som_report.pdf')
-        summary_fig.savefig('mall_customer_som_report.png', dpi=300)
-        print("Summary report saved as 'mall_customer_som_report.pdf' and 'mall_customer_som_report.png'")
-    except Exception as e:
-        print(f"Could not save summary report: {e}")
+    #     # Save the report
+    #     summary_fig.tight_layout()
+    #     summary_fig.savefig('mall_customer_som_report.pdf')
+    #     summary_fig.savefig('mall_customer_som_report.png', dpi=300)
+    #     print("Summary report saved as 'mall_customer_som_report.pdf' and 'mall_customer_som_report.png'")
+    # except Exception as e:
+    #     print(f"Could not save summary report: {e}")
 
 except Exception as e:
     print(f"Error in visualization: {e}")
